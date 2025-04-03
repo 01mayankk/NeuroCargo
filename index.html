@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicle Load Prediction</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .header {
+            background-color: #1976d2;
+            color: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .input-section, .results-section {
+            flex: 1;
+            min-width: 300px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #1976d2;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #1565c0;
+        }
+        .results-placeholder {
+            text-align: center;
+            color: #666;
+            padding: 40px 0;
+        }
+        .results-placeholder i {
+            font-size: 48px;
+            margin-bottom: 15px;
+            color: #999;
+        }
+        .prediction-result {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+        .prediction-safe {
+            background-color: #e8f5e9;
+            border-left: 5px solid #4caf50;
+        }
+        .prediction-overloaded {
+            background-color: #ffebee;
+            border-left: 5px solid #f44336;
+        }
+        .icon {
+            font-size: 24px;
+            margin-right: 15px;
+        }
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .metric-item {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .metric-label {
+            font-size: 14px;
+            color: #666;
+        }
+        .metric-value {
+            font-weight: 600;
+            font-size: 18px;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+        .error {
+            background-color: #ffebee;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            color: #d32f2f;
+        }
+        .slider-container {
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        .slider-track {
+            height: 8px;
+            background: linear-gradient(90deg, #4caf50 0%, #4caf50 70%, #ff9800 70%, #ff9800 90%, #f44336 90%, #f44336 100%);
+            border-radius: 4px;
+            position: relative;
+        }
+        .slider-thumb {
+            width: 16px;
+            height: 16px;
+            background-color: #1976d2;
+            border-radius: 50%;
+            position: absolute;
+            top: -4px;
+            transform: translateX(-50%);
+        }
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+            font-size: 12px;
+            color: #666;
+        }
+        .recommendation {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e3f2fd;
+            border-radius: 4px;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Vehicle Load Prediction</h1>
+        <p>Enter vehicle and load details to predict if your vehicle is safely loaded</p>
+    </div>
+
+    <div class="container">
+        <!-- Input Section -->
+        <div class="input-section">
+            <h2>Vehicle & Load Details</h2>
+            <div id="error-message" class="error hidden"></div>
+            
+            <form id="prediction-form">
+                <div class="form-group">
+                    <label for="vehicle-type">Vehicle Type</label>
+                    <select id="vehicle-type" name="vehicle_type" required>
+                        <option value="2-wheeler">2-Wheeler</option>
+                        <option value="4-wheeler 5-seater">4-Wheeler 5-Seater</option>
+                        <option value="4-wheeler 7-seater">4-Wheeler 7-Seater</option>
+                        <option value="delivery vehicle">Delivery Vehicle</option>
+                        <option value="heavy vehicle">Heavy Vehicle</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="weight">Vehicle Weight (kg)</label>
+                    <input type="number" id="weight" name="weight" min="0" value="100" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="max-load-capacity">Max Load Capacity (kg)</label>
+                    <input type="number" id="max-load-capacity" name="max_load_capacity" min="0" value="150" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="passenger-count">Passenger Count</label>
+                    <input type="number" id="passenger-count" name="passenger_count" min="0" value="1" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="cargo-weight">Cargo Weight (kg)</label>
+                    <input type="number" id="cargo-weight" name="cargo_weight" min="0" value="20" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="weather">Weather Condition</label>
+                    <select id="weather" name="weather">
+                        <option value="normal">Normal</option>
+                        <option value="rainy">Rainy</option>
+                        <option value="snowy">Snowy</option>
+                        <option value="windy">Windy</option>
+                        <option value="stormy">Stormy</option>
+                    </select>
+                </div>
+
+                <button type="submit" id="predict-button">Predict Load Status</button>
+            </form>
+        </div>
+
+        <!-- Results Section -->
+        <div class="results-section">
+            <h2>Prediction Results</h2>
+            
+            <!-- Loading State -->
+            <div id="loading" class="loading hidden">
+                <p>Analyzing vehicle load...</p>
+            </div>
+            
+            <!-- Results Placeholder (initial state) -->
+            <div id="results-placeholder" class="results-placeholder">
+                <div style="font-size: 48px; margin-bottom: 15px;">⚖️</div>
+                <h3>Enter details and click Predict</h3>
+                <p>The prediction model will analyze your data to determine if the vehicle is safely loaded.</p>
+            </div>
+            
+            <!-- Prediction Results (hidden initially) -->
+            <div id="prediction-results" class="hidden">
+                <!-- Prediction Status -->
+                <div id="prediction-status" class="prediction-result">
+                    <span class="icon">✓</span>
+                    <div>
+                        <h3 id="status-text">Vehicle Load is Safe</h3>
+                        <p>Confidence: <span id="confidence">95</span>%</p>
+                    </div>
+                </div>
+                
+                <!-- Load Percentage -->
+                <div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <h4>Load Percentage</h4>
+                        <span id="load-percentage">70</span>%
+                    </div>
+                    <div class="slider-container">
+                        <div class="slider-track">
+                            <div id="slider-thumb" class="slider-thumb" style="left: 70%;"></div>
+                        </div>
+                        <div class="slider-labels">
+                            <span>0%</span>
+                            <span>50%</span>
+                            <span>100%</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Risk Assessment -->
+                <h4>Risk Assessment: <span id="risk-assessment">Medium</span></h4>
+                <div id="risk-message" class="prediction-result prediction-safe">
+                    <span class="icon">ℹ️</span>
+                    <div id="risk-description">
+                        Vehicle is loaded within safe limits.
+                    </div>
+                </div>
+                
+                <!-- Additional Metrics -->
+                <h4>Load Metrics</h4>
+                <div class="metrics-grid">
+                    <div class="metric-item">
+                        <div class="metric-label">Total Weight</div>
+                        <div class="metric-value"><span id="total-weight">190</span> kg</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-label">Remaining Capacity</div>
+                        <div class="metric-value"><span id="remaining-capacity">60</span> kg</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-label">Passenger Weight</div>
+                        <div class="metric-value"><span id="passenger-weight">70</span> kg</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-label">Fuel Efficiency Impact</div>
+                        <div class="metric-value"><span id="fuel-efficiency">10</span>% reduction</div>
+                    </div>
+                </div>
+                
+                <!-- Recommendation -->
+                <div class="recommendation">
+                    <h4>Recommendation</h4>
+                    <p id="recommendation-text">The vehicle is loaded within acceptable parameters and is safe to operate.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const predictionForm = document.getElementById('prediction-form');
+            const errorMessage = document.getElementById('error-message');
+            const loading = document.getElementById('loading');
+            const resultsPlaceholder = document.getElementById('results-placeholder');
+            const predictionResults = document.getElementById('prediction-results');
+            
+            // Prediction form submission
+            predictionForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Show loading state
+                errorMessage.classList.add('hidden');
+                loading.classList.remove('hidden');
+                resultsPlaceholder.classList.add('hidden');
+                predictionResults.classList.add('hidden');
+                
+                // Get form data
+                const formData = {
+                    vehicle_type: document.getElementById('vehicle-type').value,
+                    weight: parseFloat(document.getElementById('weight').value),
+                    max_load_capacity: parseFloat(document.getElementById('max-load-capacity').value),
+                    passenger_count: parseInt(document.getElementById('passenger-count').value),
+                    cargo_weight: parseFloat(document.getElementById('cargo-weight').value),
+                    weather: document.getElementById('weather').value
+                };
+                
+                // Validate inputs
+                if (formData.weight <= 0 || formData.max_load_capacity <= 0) {
+                    showError('Weight and max load capacity must be greater than zero');
+                    return;
+                }
+                
+                // Make API call
+                fetch('http://127.0.0.1:5000/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('API request failed');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.status === 'success') {
+                        displayResults(data);
+                    } else {
+                        showError(data.message || 'Prediction failed');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showError('Failed to connect to prediction service. Please try again later.');
+                });
+            });
+            
+            // Show error message
+            function showError(message) {
+                errorMessage.textContent = message;
+                errorMessage.classList.remove('hidden');
+                loading.classList.add('hidden');
+                resultsPlaceholder.classList.remove('hidden');
+            }
+            
+            // Display prediction results
+            function displayResults(data) {
+                loading.classList.add('hidden');
+                resultsPlaceholder.classList.add('hidden');
+                predictionResults.classList.remove('hidden');
+                
+                // Get UI elements
+                const predictionStatus = document.getElementById('prediction-status');
+                const statusText = document.getElementById('status-text');
+                const confidenceElem = document.getElementById('confidence');
+                const loadPercentageElem = document.getElementById('load-percentage');
+                const sliderThumb = document.getElementById('slider-thumb');
+                const riskAssessmentElem = document.getElementById('risk-assessment');
+                const riskMessage = document.getElementById('risk-message');
+                const riskDescription = document.getElementById('risk-description');
+                const totalWeightElem = document.getElementById('total-weight');
+                const remainingCapacityElem = document.getElementById('remaining-capacity');
+                const passengerWeightElem = document.getElementById('passenger-weight');
+                const fuelEfficiencyElem = document.getElementById('fuel-efficiency');
+                const recommendationText = document.getElementById('recommendation-text');
+                
+                // Set prediction status
+                const isOverloaded = data.prediction === 1;
+                
+                if (isOverloaded) {
+                    predictionStatus.className = 'prediction-result prediction-overloaded';
+                    predictionStatus.querySelector('.icon').textContent = '⚠️';
+                    statusText.textContent = 'Vehicle Overloaded';
+                } else {
+                    predictionStatus.className = 'prediction-result prediction-safe';
+                    predictionStatus.querySelector('.icon').textContent = '✓';
+                    statusText.textContent = 'Vehicle Load is Safe';
+                }
+                
+                // Set confidence
+                confidenceElem.textContent = Math.round(data.confidence * 100);
+                
+                // Set load percentage
+                const loadPercentage = data.metrics.load_percentage;
+                loadPercentageElem.textContent = loadPercentage;
+                sliderThumb.style.left = loadPercentage + '%';
+                
+                // Set risk assessment
+                const riskAssessment = data.metrics.risk_assessment;
+                riskAssessmentElem.textContent = riskAssessment;
+                
+                if (riskAssessment === 'Low') {
+                    riskMessage.className = 'prediction-result prediction-safe';
+                    riskDescription.textContent = 'Vehicle is loaded within safe limits.';
+                } else if (riskAssessment === 'Medium') {
+                    riskMessage.className = 'prediction-result prediction-safe';
+                    riskDescription.textContent = 'Vehicle is approaching maximum load capacity. Use caution.';
+                } else {
+                    riskMessage.className = 'prediction-result prediction-overloaded';
+                    riskDescription.textContent = 'Vehicle is at or exceeding safe load capacity. Not recommended for travel.';
+                }
+                
+                // Set metrics
+                totalWeightElem.textContent = data.metrics.total_weight;
+                remainingCapacityElem.textContent = data.metrics.remaining_capacity;
+                passengerWeightElem.textContent = data.metrics.passenger_weight;
+                fuelEfficiencyElem.textContent = data.metrics.fuel_efficiency_impact;
+                
+                // Set recommendation
+                if (isOverloaded) {
+                    recommendationText.textContent = 'Reduce the load to ensure safe operation of the vehicle. Consider removing cargo or reducing passenger count.';
+                } else {
+                    recommendationText.textContent = 'The vehicle is loaded within acceptable parameters and is safe to operate.';
+                }
+            }
+        });
+    </script>
+</body>
+</html> 
