@@ -1,0 +1,1958 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeuroCargo - Intelligent Vehicle Load Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            transition: background-color 0.5s ease, color 0.5s ease;
+            min-height: 100vh;
+            position: relative;
+            font-family: 'Poppins', Arial, sans-serif;
+            background: linear-gradient(-45deg, rgba(41, 128, 185, 0.2), rgba(142, 68, 173, 0.2), rgba(39, 174, 96, 0.2));
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+        }
+        
+        @keyframes gradientBG {
+            0% {background-position: 0% 50%;}
+            50% {background-position: 100% 50%;}
+            100% {background-position: 0% 50%;}
+        }
+        
+        .dark-mode {
+            background: linear-gradient(-45deg, rgba(10, 15, 30, 0.95), rgba(20, 30, 45, 0.95), rgba(10, 15, 30, 0.95));
+            background-size: 400% 400%;
+            color: #f0f0f0;
+        }
+        
+        .dark-mode .card {
+            background-color: #272b33;
+            border-color: #3a3f48;
+            color: #f0f0f0;
+        }
+        
+        .dark-mode .card-header {
+            background-color: #323842;
+            border-color: #3a3f48;
+            color: #ffffff;
+        }
+        
+        .dark-mode .form-control,
+        .dark-mode .form-select {
+            background-color: #333940;
+            border-color: #454b54;
+            color: #f0f0f0;
+        }
+        
+        .dark-mode .form-label {
+            color: #d0d0d0;
+        }
+        
+        .dark-mode .form-control::placeholder {
+            color: #999;
+        }
+        
+        .dark-mode .form-control:focus,
+        .dark-mode .form-select:focus {
+            background-color: #3a4148;
+            color: #ffffff;
+            border-color: #007bff;
+        }
+        
+        .dark-mode .metric-card {
+            background-color: #2d3238;
+            border-color: #3a3f48;
+        }
+        
+        .dark-mode .metric-card .card-title {
+            color: #a0cfff;
+        }
+        
+        .dark-mode .metric-card .card-text {
+            color: #ffffff;
+        }
+        
+        .dark-mode .metric-card:hover {
+            background-color: #323842;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .dark-mode .factor-item .card-body {
+            background: linear-gradient(135deg, rgba(40, 45, 55, 0.9), rgba(30, 35, 45, 0.9));
+            color: #f0f0f0;
+        }
+        
+        .dark-mode .btn-primary {
+            background-color: #1a75ff;
+            border-color: #005ce6;
+        }
+        
+        .dark-mode .btn-primary:hover {
+            background-color: #0062cc;
+            border-color: #0056b3;
+        }
+        
+        .dark-mode .progress {
+            background-color: #3a4148;
+        }
+        
+        .dark-mode .alert-info {
+            background-color: rgba(25, 60, 85, 0.8);
+            border-color: rgba(40, 90, 130, 0.8);
+            color: #e0e0e0;
+        }
+        
+        .dark-mode .text-primary {
+            color: #5ea4ff !important;
+        }
+        
+        .dark-mode .text-success {
+            color: #4ddb9c !important;
+        }
+        
+        .dark-mode .text-warning {
+            color: #ffdd67 !important;
+        }
+        
+        .dark-mode .text-danger {
+            color: #ff7b7b !important;
+        }
+        
+        .dark-mode .metric-detail {
+            background: rgba(15, 20, 30, 0.95);
+            box-shadow: inset 0 0 20px rgba(120, 180, 255, 0.2);
+            border: 1px solid rgba(120, 180, 255, 0.2);
+        }
+        
+        .dark-mode .metric-detail h4 {
+            color: #6ef2ff;
+            text-shadow: 0 0 10px rgba(110, 242, 255, 0.8);
+        }
+        
+        .dark-mode .metric-detail strong {
+            color: #ffea6c;
+            text-shadow: 0 0 10px rgba(255, 234, 108, 0.8);
+        }
+        
+        .dark-mode .metric-detail p {
+            color: #e0e0e0;
+        }
+        
+        .dark-mode .section-title {
+            color: #bcdeff;
+            text-shadow: 0 0 5px rgba(100, 180, 255, 0.3);
+        }
+        
+        .dark-mode .vehicle-info-section {
+            background-color: rgba(30, 90, 160, 0.15);
+        }
+        
+        .dark-mode .results-section {
+            background-color: rgba(120, 80, 160, 0.15);
+        }
+        
+        .dark-mode .metrics-section {
+            background-color: rgba(40, 140, 100, 0.15);
+        }
+        
+        .dark-mode .environment-section {
+            background-color: rgba(60, 150, 230, 0.15);
+            border-top: 2px dashed rgba(100, 150, 200, 0.2);
+        }
+        
+        .dark-mode .vehicle-status-container {
+            background: linear-gradient(to right, rgba(30, 40, 60, 0.3), rgba(40, 50, 70, 0.4), rgba(30, 40, 60, 0.3));
+        }
+        
+        .dark-mode .confidence-value {
+            background-color: rgba(30, 120, 255, 0.2);
+            color: #6bb5ff;
+        }
+        
+        .dark-mode .adjusted-value {
+            background-color: rgba(40, 160, 100, 0.2);
+            color: #66e0a3;
+        }
+        
+        .dark-mode .metric-card:hover .card-text {
+            transform: scale(1.1);
+            text-shadow: 0 2px 10px rgba(255, 255, 255, 0.3);
+        }
+        
+        .dark-mode .metric-card:hover .metric-detail {
+            opacity: 1;
+        }
+        
+        .dark-mode .card:hover {
+            box-shadow: 0 15px 30px rgba(0, 140, 255, 0.15);
+            transform: translateY(-8px);
+        }
+        
+        .dark-mode .factor-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(100, 180, 255, 0.15);
+            background-color: #2a303a;
+        }
+        
+        .dark-mode .particle {
+            background-color: rgba(200, 220, 255, 0.15);
+        }
+        
+        .card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .dark-mode .card:hover {
+            box-shadow: 0 15px 30px rgba(255, 255, 255, 0.05);
+        }
+        
+        .vehicle-info-header {
+            background: linear-gradient(135deg, #076585 0%, #1e88e5 100%);
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .results-header {
+            background: linear-gradient(135deg, #654ea3 0%, #da98b4 100%);
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .metrics-header {
+            background: linear-gradient(135deg, #1d976c 0%, #93f9b9 100%);
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .vehicle-info-section {
+            background-color: rgba(30, 136, 229, 0.05);
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(30, 136, 229, 0.1);
+        }
+        
+        .results-section {
+            background-color: rgba(101, 78, 163, 0.05);
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(101, 78, 163, 0.1);
+        }
+        
+        .metrics-section {
+            background-color: rgba(29, 151, 108, 0.05);
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(29, 151, 108, 0.1);
+        }
+        
+        .environment-section {
+            border-top: 2px dashed rgba(0,0,0,0.1);
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            background-color: rgba(66, 165, 245, 0.05);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px rgba(66, 165, 245, 0.1);
+        }
+        
+        .dark-mode .environment-section {
+            border-top: 2px dashed rgba(255,255,255,0.1);
+        }
+        
+        .dark-mode .vehicle-info-section {
+            background-color: rgba(30, 136, 229, 0.1);
+        }
+        
+        .dark-mode .results-section {
+            background-color: rgba(101, 78, 163, 0.1);
+        }
+        
+        .dark-mode .metrics-section {
+            background-color: rgba(29, 151, 108, 0.1);
+        }
+        
+        .dark-mode .environment-section {
+            background-color: rgba(66, 165, 245, 0.1);
+        }
+        
+        .status-highlight {
+            background: linear-gradient(to right, rgba(255,255,255,0.1), rgba(255,255,255,0.2), rgba(255,255,255,0.1));
+            padding: 1rem 0;
+            margin: 1rem 0;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        
+        .dark-mode .status-highlight {
+            background: linear-gradient(to right, rgba(0,0,0,0.2), rgba(0,0,0,0.3), rgba(0,0,0,0.2));
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .confidence-container {
+            background-color: rgba(0,0,0,0.03);
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.05);
+        }
+        
+        .dark-mode .confidence-container {
+            background-color: rgba(255,255,255,0.05);
+            box-shadow: inset 0 0 5px rgba(255,255,255,0.05);
+        }
+        
+        .confidence-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            background-color: rgba(13, 110, 253, 0.1);
+            color: #0d6efd;
+            margin-left: 5px;
+        }
+        
+        .adjusted-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            background-color: rgba(25, 135, 84, 0.1);
+            color: #198754;
+            margin-left: 5px;
+        }
+        
+        .dark-mode .confidence-value {
+            background-color: rgba(13, 110, 253, 0.2);
+        }
+        
+        .dark-mode .adjusted-value {
+            background-color: rgba(25, 135, 84, 0.2);
+        }
+        
+        .metric-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+            cursor: pointer;
+            border-radius: 10px;
+            border: 1px solid rgba(0, 0, 0, 0.125);
+        }
+        
+        .metric-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            background-color: #f8f9fb;
+        }
+        
+        .dark-mode .metric-card:hover {
+            background-color: #252525;
+            box-shadow: 0 10px 20px rgba(255, 255, 255, 0.05);
+        }
+        
+        .factor-item {
+            transition: all 0.3s ease;
+        }
+        
+        .factor-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .dark-mode .factor-item:hover {
+            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.05);
+        }
+        
+        .progress {
+            height: 25px;
+            border-radius: 5px;
+            background-color: #e9ecef;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            transition: width 1s ease-in-out;
+        }
+        
+        .btn {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border-radius: 5px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            border-radius: 100%;
+            transform: scale(1, 1) translate(-50%);
+            transform-origin: 50% 50%;
+        }
+        
+        .btn:active::after {
+            opacity: 1;
+            width: 100%;
+            height: 100%;
+            transform: scale(0, 0) translate(-50%);
+            transition: transform 0.3s ease-out, opacity 0.2s ease-out;
+        }
+        
+        #loading {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 200px;
+        }
+        
+        .result-card {
+            display: none;
+        }
+        
+        .form-control, .form-select {
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out, transform 0.2s ease;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: #6c757d;
+            box-shadow: 0 0 0 0.25rem rgba(108, 117, 125, 0.25);
+            transform: translateY(-2px);
+        }
+        
+        .spinner-border {
+            animation: spinner-border 0.75s linear infinite;
+        }
+        
+        .performance-badge {
+            margin-left: 10px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        
+        .graph-container {
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        
+        .graph-container:hover {
+            transform: scale(1.5);
+            z-index: 100;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .graph-container .badge {
+            display: none;
+        }
+        
+        .graph-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            border-radius: 10px;
+        }
+        
+        .graph-container:hover .graph-overlay {
+            opacity: 1;
+        }
+        
+        .dark-mode .graph-container {
+            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.05);
+        }
+        
+        #weightDistributionGraph {
+            transition: transform 0.3s ease;
+            cursor: pointer;
+            max-height: 400px;
+            object-fit: contain;
+        }
+        
+        #weightDistributionGraph:hover {
+            transform: scale(1.05);
+        }
+        
+        .graph-title {
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .metric-detail {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            border-radius: 10px;
+            pointer-events: none;
+            padding: 15px;
+            text-align: center;
+            font-size: 1.1rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            box-shadow: inset 0 0 20px rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.2);
+            z-index: 10;
+        }
+        
+        .metric-detail h4 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #5ee7ff;
+            text-shadow: 0 0 10px rgba(94, 231, 255, 0.7);
+        }
+        
+        .metric-detail strong {
+            color: #ffde59;
+            font-size: 1.3rem;
+            text-shadow: 0 0 10px rgba(255, 222, 89, 0.7);
+        }
+        
+        .dark-mode .metric-detail {
+            background: rgba(5, 10, 20, 0.97);
+            box-shadow: inset 0 0 20px rgba(120, 180, 255, 0.3);
+            border: 1px solid rgba(100, 150, 255, 0.4);
+        }
+        
+        .dark-mode .metric-detail h4 {
+            color: #7df9ff;
+            text-shadow: 0 0 10px rgba(125, 249, 255, 0.9);
+            font-weight: bold;
+        }
+        
+        .dark-mode .metric-detail p {
+            color: #ffffff;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
+        }
+        
+        .dark-mode .metric-detail strong {
+            color: #fffa65;
+            text-shadow: 0 0 10px rgba(255, 250, 101, 0.9);
+            font-size: 1.4rem;
+        }
+        
+        .floating-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .particle {
+            position: absolute;
+            background-color: rgba(100, 149, 237, 0.2);
+            border-radius: 50%;
+            animation: float 15s infinite linear;
+        }
+        
+        .dark-mode .particle {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(0) translateX(0) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) translateX(100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        /* Splash Screen */
+        .splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1f3b8d);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            z-index: 9999;
+            color: white;
+            transition: opacity 0.8s ease-out, visibility 0.8s ease-out;
+        }
+        
+        @keyframes gradientBG {
+            0% {background-position: 0% 50%;}
+            50% {background-position: 100% 50%;}
+            100% {background-position: 0% 50%;}
+        }
+        
+        .splash-content {
+            text-align: center;
+            position: relative;
+        }
+        
+        .splash-title {
+            font-size: 4.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            letter-spacing: 2px;
+            text-shadow: 2px 4px 8px rgba(0, 0, 0, 0.5);
+            animation: neonGlow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes neonGlow {
+            from {
+                text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #0073e6, 0 0 20px #0073e6;
+            }
+            to {
+                text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #0073e6, 0 0 40px #0073e6;
+            }
+        }
+        
+        .splash-tagline {
+            font-size: 1.8rem;
+            margin-bottom: 2rem;
+            letter-spacing: 1px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 1s ease 0.5s forwards;
+        }
+        
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Vehicle Animation */
+        .vehicle-container {
+            position: relative;
+            width: 100%;
+            height: 120px;
+            margin-top: 2rem;
+            overflow: hidden;
+        }
+        
+        .road {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 20px;
+            background-color: #333;
+            box-shadow: 0 0 10px rgba(255,255,255,0.2);
+        }
+        
+        .vehicle {
+            position: absolute;
+            bottom: 20px;
+            width: 130px;
+            height: 65px;
+            background-color: #e74c3c;
+            border-radius: 12px;
+            animation: driveSmooth 7s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+            transform-origin: bottom center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+        }
+        
+        .vehicle:before {
+            content: '';
+            position: absolute;
+            top: -25px;
+            width: 70%;
+            height: 30px;
+            background-color: #3498db;
+            border-radius: 12px 12px 0 0;
+            left: 15%;
+            box-shadow: 0 -5px 10px rgba(0,0,0,0.2);
+        }
+        
+        .wheel {
+            position: absolute;
+            bottom: -10px;
+            width: 22px;
+            height: 22px;
+            background-color: #333;
+            border-radius: 50%;
+            border: 3px solid #777;
+            animation: rotateSmooth 1.2s linear infinite;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+        
+        .wheel.front {
+            right: 15px;
+        }
+        
+        .wheel.back {
+            left: 15px;
+        }
+        
+        @keyframes driveSmooth {
+            0% {
+                left: -150px;
+                transform: translateY(0);
+            }
+            20% {
+                transform: translateY(-5px);
+            }
+            40% {
+                transform: translateY(3px);
+            }
+            60% {
+                transform: translateY(-2px);
+            }
+            80% {
+                transform: translateY(1px);
+            }
+            100% {
+                left: calc(100% + 50px);
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes rotateSmooth {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        
+        /* Title animation */
+        .sanskrit-title {
+            font-size: 3.5rem;
+            text-align: center;
+            font-weight: bold;
+            background: linear-gradient(45deg, #2b5876, #4e4376, #7873f5);
+            background-size: 300% 300%;
+            color: transparent;
+            -webkit-background-clip: text;
+            background-clip: text;
+            transition: transform 0.3s ease, text-shadow 0.3s ease;
+            animation: gradient-shift 5s ease infinite;
+            margin-bottom: 0.5rem;
+        }
+        
+        .sanskrit-title:hover {
+            transform: translateY(-5px) scale(1.05);
+            text-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+        }
+        
+        @keyframes gradient-shift {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+        
+        .tagline {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #6c757d;
+            margin-bottom: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+        
+        .tagline:hover {
+            transform: scale(1.05);
+        }
+        
+        .dark-mode .tagline {
+            color: #adb5bd;
+        }
+        
+        /* Theme toggle */
+        .theme-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #0d6efd;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            transition: transform 0.3s ease, background-color 0.3s ease;
+        }
+        
+        .theme-toggle:hover {
+            transform: scale(1.1);
+        }
+        
+        .theme-toggle i {
+            font-size: 1.5rem;
+        }
+        
+        /* Navbar logo */
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            transition: transform 0.3s ease;
+        }
+        
+        .navbar-brand:hover {
+            transform: scale(1.05);
+        }
+        
+        .navbar-brand-text {
+            font-weight: bold;
+            margin-left: 10px;
+            font-size: 1.2rem;
+        }
+        
+        /* Modal for enlarged graphs */
+        .graph-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .graph-modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 90%;
+            max-height: 90%;
+            overflow: auto;
+            position: relative;
+        }
+        
+        .dark-mode .graph-modal-content {
+            background-color: #1e1e1e;
+            color: white;
+        }
+        
+        .graph-modal-close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #333;
+            z-index: 2001;
+        }
+        
+        .dark-mode .graph-modal-close {
+            color: white;
+        }
+        
+        .graph-modal-title {
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .graph-modal-img {
+            max-width: 100%;
+            max-height: 70vh;
+            object-fit: contain;
+        }
+        
+        /* Improve readability with better contrast and shadows for text */
+        .card-body {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .card-text, .card-title {
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        
+        .display-5, .display-6 {
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        
+        .metric-card .card-text {
+            font-size: 2.5rem;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+        
+        .metric-card:hover .card-text {
+            transform: scale(1.1);
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Add pulsing animation to metrics with critical values */
+        @keyframes pulseBorder {
+            0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+        }
+        
+        .pulse-border {
+            animation: pulseBorder 2s infinite;
+        }
+        
+        /* Add subtle floating animation for cards */
+        @keyframes floatCard {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        .float-animation {
+            animation: floatCard 3s ease-in-out infinite;
+        }
+        
+        /* Add stylish underline animation for section titles */
+        .section-title {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 1.5rem;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 3px;
+            bottom: -5px;
+            left: 0;
+            background-color: #0d6efd;
+            transition: width 0.3s ease;
+        }
+        
+        .section-title:hover::after {
+            width: 100%;
+        }
+        
+        .dark-mode .section-title::after {
+            background-color: #5899e2;
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating Background Particles -->
+    <div class="floating-particles" id="particles"></div>
+    
+    <!-- Splash Screen -->
+    <div id="splashScreen" class="splash-screen">
+        <div class="splash-content">
+            <h1 class="splash-title animate__animated animate__fadeIn">NeuroCargo</h1>
+            <p class="splash-tagline">Intelligent Solutions for Optimal Load Management</p>
+            <div class="vehicle-container">
+                <div class="road"></div>
+                <div class="vehicle">
+                    <div class="wheel front"></div>
+                    <div class="wheel back"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Graph Modal -->
+    <div id="graphModal" class="graph-modal">
+        <div class="graph-modal-content">
+            <span class="graph-modal-close">&times;</span>
+            <h3 class="graph-modal-title">Weight Distribution Analysis</h3>
+            <img class="graph-modal-img" src="" alt="Graph Detailed View">
+        </div>
+    </div>
+    
+    <!-- Hidden container for advanced analytics graphs -->
+    <div id="hiddenAnalytics" style="display: none;">
+        <img id="histogramGraph" src="" alt="Histogram">
+        <img id="boxPlotGraph" src="" alt="Box Plot">
+        <img id="scatterPlotGraph" src="" alt="Scatter Plot">
+        <img id="heatmapGraph" src="" alt="Heatmap">
+        <img id="pairPlotGraph" src="" alt="Pair Plot">
+        <img id="countPlotGraph" src="" alt="Count Plot">
+    </div>
+
+    <!-- Vehicle animation container -->
+    <div class="vehicle-container" id="vehicleAnimation">
+        <div class="vehicle">
+            <div class="wheel front"></div>
+            <div class="wheel back"></div>
+        </div>
+    </div>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand animate__animated animate__fadeIn" href="#">
+                NeuroCargo
+                <span class="d-block fs-6 fw-light">Intelligent Load Management</span>
+            </a>
+            {% if performance_metrics %}
+            <div class="navbar-text ms-auto">
+                <span class="performance-badge animate__animated animate__fadeIn" title="Model Accuracy">
+                    <i class="bi bi-bullseye"></i> Accuracy: {{ performance_metrics.accuracy }}
+                </span>
+            </div>
+            {% endif %}
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h1 class="sanskrit-title animate__animated animate__fadeInDown" id="mainTitle">NeuroCargo</h1>
+        <p class="tagline animate__animated animate__fadeIn">Intelligent Solutions for Optimal Load Management</p>
+        
+        {% if performance_metrics %}
+        <div class="alert alert-info alert-dismissible fade show animate__animated animate__fadeIn" role="alert">
+            <strong>High-Performance Model Active!</strong> This system uses a machine learning model with {{ performance_metrics.accuracy }} accuracy.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endif %}
+
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card animate__animated animate__fadeIn vehicle-info-section">
+                    <div class="card-header vehicle-info-header">
+                        Vehicle Information
+                    </div>
+                    <div class="card-body">
+                        <form id="predictionForm">
+                            <div class="row">
+                                <!-- Main vehicle information -->
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="vehicleType" class="form-label">Vehicle Type</label>
+                                        <select class="form-select" id="vehicleType" required>
+                                            <option value="" selected disabled>Select a vehicle type</option>
+                                            <option value="2-wheeler">2-wheeler</option>
+                                            <option value="4-wheeler 5-seater">4-wheeler 5-seater</option>
+                                            <option value="4-wheeler 7-seater">4-wheeler 7-seater</option>
+                                            <option value="delivery vehicle">Delivery Vehicle</option>
+                                            <option value="heavy vehicle">Heavy Vehicle</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="weight" class="form-label">Vehicle Weight (kg)</label>
+                                        <input type="number" class="form-control" id="weight" min="0" required>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="maxLoadCapacity" class="form-label">Maximum Load Capacity (kg)</label>
+                                        <input type="number" class="form-control" id="maxLoadCapacity" min="0" required>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="passengerCount" class="form-label">Number of Passengers</label>
+                                        <input type="number" class="form-control" id="passengerCount" min="0" required>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="cargoWeight" class="form-label">Cargo Weight (kg)</label>
+                                        <input type="number" class="form-control" id="cargoWeight" min="0" required>
+                                    </div>
+                                </div>
+                                
+                                <!-- Additional Factors section moved to right column -->
+                                <div class="col-md-6">
+                                    <h5 class="mb-3 text-primary">Additional Factors</h5>
+                                    
+                                    <div class="mb-3">
+                                        <label for="roadCondition" class="form-label">Road Condition</label>
+                                        <select class="form-select factor-item" id="roadCondition">
+                                            <option value="excellent">Excellent</option>
+                                            <option value="good" selected>Good</option>
+                                            <option value="average">Average</option>
+                                            <option value="poor">Poor</option>
+                                            <option value="very poor">Very Poor</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="weather" class="form-label">Weather Condition</label>
+                                        <select class="form-select factor-item" id="weather">
+                                            <option value="clear" selected>Clear</option>
+                                            <option value="rainy">Rainy</option>
+                                            <option value="snowy">Snowy</option>
+                                            <option value="foggy">Foggy</option>
+                                            <option value="windy">Windy</option>
+                                            <option value="extreme">Extreme Conditions</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="region" class="form-label">Region/Terrain</label>
+                                        <select class="form-select factor-item" id="region">
+                                            <option value="urban" selected>Urban</option>
+                                            <option value="suburban">Suburban</option>
+                                            <option value="rural">Rural</option>
+                                            <option value="highway">Highway</option>
+                                            <option value="mountainous">Mountainous</option>
+                                            <option value="coastal">Coastal</option>
+                                            <option value="desert">Desert</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="mt-4">
+                                        <button type="submit" class="btn btn-primary w-100">
+                                            <span class="d-flex align-items-center justify-content-center">
+                                                <span id="checkButtonText">Check Load Status</span>
+                                                <span id="spinnerInButton" class="spinner-border spinner-border-sm ms-2 d-none" role="status" aria-hidden="true"></span>
+                                            </span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loader -->
+        <div id="loading" class="my-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Processing your request...</p>
+        </div>
+
+        <!-- Moved results section below the form -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div id="resultCard" class="card result-card mt-4 results-section">
+                    <div class="card-header results-header">
+                        Load Analysis Results
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center mb-4 animate__animated animate__pulse vehicle-status-container">
+                            <h4>Vehicle Status:</h4>
+                            <h2 id="predictionResult" class="mb-3">Not Overloaded</h2>
+                            <div class="progress mb-3" style="height: 2rem;">
+                                <div id="loadPercentageBar" class="progress-bar" role="progressbar" style="width: 0%"></div>
+                            </div>
+                            <h4 id="loadPercentage">Load: 0%</h4>
+                            <div class="confidence-container">
+                                <p>Prediction Confidence: <span id="confidenceValue" class="confidence-value">0%</span></p>
+                                <p>Adjusted confidence based on environmental factors: <span id="adjustedConfidence" class="adjusted-value">0%</span></p>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <div class="card metric-card h-100">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title">Total Weight</h5>
+                                        <p id="totalWeight" class="card-text display-5">0 kg</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="card metric-card h-100">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title">Remaining Capacity</h5>
+                                        <p id="remainingCapacity" class="card-text display-5">0 kg</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="card metric-card h-100">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title">Risk Assessment</h5>
+                                        <p id="riskAssessment" class="card-text display-5">Unknown</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="card metric-card h-100">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title">Fuel Efficiency Impact</h5>
+                                        <p id="fuelEfficiency" class="card-text display-5">0%</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4 environment-section">
+                            <h5 class="mb-3">Environment Impact Analysis</h5>
+                            <div class="alert alert-info">
+                                <div class="d-flex align-items-center">
+                                    <div>
+                                        <strong id="environmentImpact">Environmental factors considered</strong>
+                                        <p class="mb-0" id="environmentDetails">Road: Good | Weather: Clear | Region: Urban</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <div class="card h-100 factor-item">
+                                        <div class="card-body text-center">
+                                            <h6 class="card-title">Road Factor</h6>
+                                            <p id="roadFactor" class="mb-0">+0% risk</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="card h-100 factor-item">
+                                        <div class="card-body text-center">
+                                            <h6 class="card-title">Weather Factor</h6>
+                                            <p id="weatherFactor" class="mb-0">+0% risk</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="card h-100 factor-item">
+                                        <div class="card-body text-center">
+                                            <h6 class="card-title">Region Factor</h6>
+                                            <p id="regionFactor" class="mb-0">+0% risk</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Weight Distribution Graph moved to bottom -->
+                        <div class="text-center mt-5" id="graphContainer">
+                            <h4 class="mb-3">Weight Distribution</h4>
+                            <div class="graph-container position-relative">
+                                <img id="weightDistributionGraph" class="img-fluid" src="" alt="Weight Distribution">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Model Performance Metrics Row -->
+        {% if performance_metrics %}
+        <div class="row mt-4">
+            <div class="col-lg-12">
+                <div class="card animate__animated animate__fadeIn metrics-section" style="animation-delay: 0.2s">
+                    <div class="card-header metrics-header">
+                        Model Performance Metrics
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-sm-3 mb-3">
+                                <div class="card metric-card h-100">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title">Accuracy</h5>
+                                        <p class="card-text display-6">{{ performance_metrics.accuracy }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-3 mb-3">
+                                <div class="card metric-card h-100">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title">Precision</h5>
+                                        <p class="card-text display-6">{{ performance_metrics.precision }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-3 mb-3">
+                                <div class="card metric-card h-100">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title">Recall</h5>
+                                        <p class="card-text display-6">{{ performance_metrics.recall }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-3 mb-3">
+                                <div class="card metric-card h-100">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title">F1 Score</h5>
+                                        <p class="card-text display-6">{{ performance_metrics.f1 }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="theme-toggle" id="themeToggle" title="Toggle Dark Mode">
+        <i class="fas fa-moon"></i>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Create floating particles
+            createParticles();
+            
+            // Hide splash screen after animation completes
+            setTimeout(function() {
+                const splashScreen = document.getElementById('splashScreen');
+                splashScreen.style.opacity = '0';
+                splashScreen.style.visibility = 'hidden';
+            }, 3500);
+            
+            // Animate vehicle across screen on page load
+            const vehicleAnimation = document.getElementById('vehicleAnimation');
+            if (vehicleAnimation) {
+                vehicleAnimation.style.animation = 'driveSmooth 5s cubic-bezier(0.25, 0.1, 0.25, 1) forwards';
+                
+                setTimeout(() => {
+                    vehicleAnimation.style.display = 'none';
+                }, 5000);
+            }
+            
+            // Function to create floating particles
+            function createParticles() {
+                const particlesContainer = document.getElementById('particles');
+                const particleCount = 25;
+                
+                for (let i = I = 0; i < particleCount; i++) {
+                    const particle = document.createElement('div');
+                    particle.classList.add('particle');
+                    
+                    // Random size
+                    const size = Math.random() * 20 + 5;
+                    particle.style.width = `${size}px`;
+                    particle.style.height = `${size}px`;
+                    
+                    // Random position
+                    particle.style.left = `${Math.random() * 100}vw`;
+                    particle.style.top = `${Math.random() * 100}vh`;
+                    
+                    // Random delay
+                    particle.style.animationDelay = `${Math.random() * 10}s`;
+                    particle.style.animationDuration = `${15 + Math.random() * 15}s`;
+                    
+                    // Random opacity
+                    particle.style.opacity = Math.random() * 0.6 + 0.2;
+                    
+                    particlesContainer.appendChild(particle);
+                }
+            }
+            
+            const predictionForm = document.getElementById('predictionForm');
+            const loadingIndicator = document.getElementById('loading');
+            const resultCard = document.getElementById('resultCard');
+            const predictionResult = document.getElementById('predictionResult');
+            const loadPercentage = document.getElementById('loadPercentage');
+            const loadPercentageBar = document.getElementById('loadPercentageBar');
+            const totalWeight = document.getElementById('totalWeight');
+            const remainingCapacity = document.getElementById('remainingCapacity');
+            const riskAssessment = document.getElementById('riskAssessment');
+            const fuelEfficiency = document.getElementById('fuelEfficiency');
+            const weightDistributionGraph = document.getElementById('weightDistributionGraph');
+            const graphContainer = document.getElementById('graphContainer');
+            const confidenceValue = document.getElementById('confidenceValue');
+            const adjustedConfidence = document.getElementById('adjustedConfidence');
+            const spinnerInButton = document.getElementById('spinnerInButton');
+            const checkButtonText = document.getElementById('checkButtonText');
+            const themeToggle = document.getElementById('themeToggle');
+            
+            // Hidden analytics elements
+            const hiddenAnalytics = document.getElementById('hiddenAnalytics');
+            const histogramGraph = document.getElementById('histogramGraph');
+            const boxPlotGraph = document.getElementById('boxPlotGraph');
+            const scatterPlotGraph = document.getElementById('scatterPlotGraph');
+            const heatmapGraph = document.getElementById('heatmapGraph');
+            const pairPlotGraph = document.getElementById('pairPlotGraph');
+            const countPlotGraph = document.getElementById('countPlotGraph');
+            
+            // Environmental factors elements
+            const environmentDetails = document.getElementById('environmentDetails');
+            const roadFactor = document.getElementById('roadFactor');
+            const weatherFactor = document.getElementById('weatherFactor');
+            const regionFactor = document.getElementById('regionFactor');
+            const environmentImpact = document.getElementById('environmentImpact');
+            
+            // Add detail overlays to metric cards
+            const metricCards = document.querySelectorAll('.metric-card');
+            metricCards.forEach(card => {
+                const cardTitle = card.querySelector('.card-title').textContent;
+                const cardValue = card.querySelector('.card-text').textContent;
+                
+                // Create detail overlay
+                const detailOverlay = document.createElement('div');
+                detailOverlay.classList.add('metric-detail');
+                
+                let detailContent = '';
+                
+                // Custom content based on the metric type
+                switch(cardTitle) {
+                    case 'Total Weight':
+                        detailContent = `<h4>${cardTitle}</h4>
+                            <p>The combined weight of the vehicle, passengers, and cargo.</p>
+                            <p>Current value: <strong>${cardValue}</strong></p>
+                            <p>This affects fuel efficiency and vehicle handling.</p>`;
+                        break;
+                    case 'Remaining Capacity':
+                        detailContent = `<h4>${cardTitle}</h4>
+                            <p>The weight capacity still available for additional cargo.</p>
+                            <p>Current value: <strong>${cardValue}</strong></p>
+                            <p>Exceeding capacity can lead to safety issues and vehicle damage.</p>`;
+                        break;
+                    case 'Risk Assessment':
+                        detailContent = `<h4>${cardTitle}</h4>
+                            <p>The evaluated risk level of the current load configuration.</p>
+                            <p>Current assessment: <strong>${cardValue}</strong></p>
+                            <p>Based on load percentage and environmental factors.</p>`;
+                        break;
+                    case 'Fuel Efficiency Impact':
+                        detailContent = `<h4>${cardTitle}</h4>
+                            <p>The estimated impact on fuel consumption.</p>
+                            <p>Current impact: <strong>${cardValue}</strong></p>
+                            <p>Heavier loads require more fuel and increase emissions.</p>`;
+                        break;
+                    default:
+                        detailContent = `<h4>${cardTitle}</h4>
+                            <p>Current value: <strong>${cardValue}</strong></p>`;
+                }
+                
+                detailOverlay.innerHTML = detailContent;
+                card.appendChild(detailOverlay);
+            });
+            
+            // Graph modal functionality
+            const weightDistGraphContainer = document.querySelector('.graph-container');
+            if (weightDistGraphContainer) {
+                // Remove the overlay with "Click to enlarge" text
+                const existingOverlay = weightDistGraphContainer.querySelector('.graph-overlay');
+                if (existingOverlay) {
+                    existingOverlay.remove();
+                }
+                
+                // Remove click event and add hover event
+                weightDistGraphContainer.removeEventListener('click', function() {});
+                
+                // No need for modal on hover as we're scaling in place
+                const graphModal = document.getElementById('graphModal');
+                const closeBtn = document.querySelector('.graph-modal-close');
+                
+                if (closeBtn) {
+                    closeBtn.addEventListener('click', function() {
+                        graphModal.style.display = 'none';
+                    });
+                }
+                
+                // Close modal when clicking outside
+                window.addEventListener('click', function(event) {
+                    if (event.target === graphModal) {
+                        graphModal.style.display = 'none';
+                    }
+                });
+            }
+            
+            // Environmental factor weightings
+            const roadFactors = {
+                'excellent': 0,
+                'good': 0.05,
+                'average': 0.10,
+                'poor': 0.20,
+                'very poor': 0.30
+            };
+            
+            const weatherFactors = {
+                'clear': 0,
+                'rainy': 0.15,
+                'snowy': 0.25,
+                'foggy': 0.20,
+                'windy': 0.10,
+                'extreme': 0.35
+            };
+            
+            const regionFactors = {
+                'urban': 0.05,
+                'suburban': 0.03,
+                'rural': 0.08,
+                'highway': 0,
+                'mountainous': 0.25,
+                'coastal': 0.10,
+                'desert': 0.15
+            };
+            
+            // Dark mode toggle
+            const themeIcon = themeToggle.querySelector('i');
+            
+            themeToggle.addEventListener('click', function() {
+                document.body.classList.toggle('dark-mode');
+                if (document.body.classList.contains('dark-mode')) {
+                    themeIcon.classList.remove('fa-moon');
+                    themeIcon.classList.add('fa-sun');
+                } else {
+                    themeIcon.classList.remove('fa-sun');
+                    themeIcon.classList.add('fa-moon');
+                }
+            });
+            
+            // Function to show loading state 
+            function showLoading() {
+                loadingIndicator.style.display = 'flex';
+                spinnerInButton.classList.remove('d-none');
+                checkButtonText.textContent = "Processing...";
+            }
+            
+            // Function to hide loading state
+            function hideLoading() {
+                loadingIndicator.style.display = 'none';
+                spinnerInButton.classList.add('d-none');
+                checkButtonText.textContent = "Check Load Status";
+            }
+            
+            // Updated function to calculate adjusted confidence with higher values
+            function calculateAdjustedConfidence(baseConfidence, roadType, weatherType, regionType) {
+                const roadImpact = roadFactors[roadType] || 0;
+                const weatherImpact = weatherFactors[weatherType] || 0;
+                const regionImpact = regionFactors[regionType] || 0;
+                
+                // Calculate total environmental factor impact (0-1 scale)
+                const totalEnvironmentalFactor = roadImpact + weatherImpact + regionImpact;
+                
+                // Apply a more realistic adjustment factor based on environmental conditions
+                // This will reduce confidence proportionally to environmental risk
+                const adjustmentFactor = Math.max(0.9, 1 - (totalEnvironmentalFactor * 0.25));
+                
+                // Calculate adjusted confidence without artificial minimum
+                const adjustedConfidenceValue = baseConfidence * adjustmentFactor;
+                
+                // Update UI with actual impact values
+                roadFactor.textContent = `+${(roadImpact * 100).toFixed(1)}% risk`;
+                weatherFactor.textContent = `+${(weatherImpact * 100).toFixed(1)}% risk`;
+                regionFactor.textContent = `+${(regionImpact * 100).toFixed(1)}% risk`;
+                
+                // Update environment details text
+                environmentDetails.textContent = `Road: ${roadType} | Weather: ${weatherType} | Region: ${regionType}`;
+                
+                // Set environment impact text based on total factor
+                if (totalEnvironmentalFactor > 0.5) {
+                    environmentImpact.textContent = 'High-risk environmental conditions';
+                    environmentImpact.className = 'text-danger';
+                } else if (totalEnvironmentalFactor > 0.2) {
+                    environmentImpact.textContent = 'Moderate-risk environmental conditions';
+                    environmentImpact.className = 'text-warning';
+                } else {
+                    environmentImpact.textContent = 'Low-risk environmental conditions';
+                    environmentImpact.className = 'text-success';
+                }
+                
+                return adjustedConfidenceValue;
+            }
+            
+            // Function to generate hidden analytics graphs
+            function generateHiddenAnalytics(vehicleData) {
+                // In a real application, these would be generated on the server
+                // For this demo, we'll just use placeholder images
+                const timestamp = new Date().getTime();
+                
+                histogramGraph.src = `https://via.placeholder.com/400x300/3A6EA5/FFFFFF?text=Histogram:+Weight+Distribution+for+${vehicleData.vehicle_type}`;
+                boxPlotGraph.src = `https://via.placeholder.com/400x300/3A6EA5/FFFFFF?text=Box+Plot:+Load+Capacity+Analysis`;
+                scatterPlotGraph.src = `https://via.placeholder.com/400x300/3A6EA5/FFFFFF?text=Scatter+Plot:+Weight+vs+Capacity`;
+                heatmapGraph.src = `https://via.placeholder.com/400x300/3A6EA5/FFFFFF?text=Heatmap:+Factor+Correlations`;
+                pairPlotGraph.src = `https://via.placeholder.com/400x300/3A6EA5/FFFFFF?text=Pair+Plot:+Feature+Relationships`;
+                countPlotGraph.src = `https://via.placeholder.com/400x300/3A6EA5/FFFFFF?text=Count+Plot:+Vehicle+Type+Distribution`;
+            }
+            
+            // Function to display result with animation
+            function showResultWithAnimation() {
+                resultCard.style.display = 'block';
+                resultCard.classList.add('animate__animated', 'animate__fadeIn');
+                
+                // Add animation to each metric card
+                const metricCards = resultCard.querySelectorAll('.metric-card');
+                metricCards.forEach((card, index) => {
+                    setTimeout(() => {
+                        card.classList.add('animate__animated', 'animate__fadeIn');
+                    }, 100 * index);
+                });
+                
+                // Animate the progress bar
+                loadPercentageBar.style.width = "0%";
+                setTimeout(() => {
+                    loadPercentageBar.style.width = loadPercentageBar.getAttribute('aria-valuenow') + "%";
+                }, 200);
+            }
+            
+            predictionForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Show loading state
+                showLoading();
+                
+                // Hide previous results
+                resultCard.style.display = 'none';
+                
+                // Get form values
+                const data = {
+                    vehicle_type: document.getElementById('vehicleType').value,
+                    weight: parseFloat(document.getElementById('weight').value),
+                    max_load_capacity: parseFloat(document.getElementById('maxLoadCapacity').value),
+                    passenger_count: parseInt(document.getElementById('passengerCount').value),
+                    cargo_weight: parseFloat(document.getElementById('cargoWeight').value),
+                    road_condition: document.getElementById('roadCondition').value,
+                    weather: document.getElementById('weather').value,
+                    region: document.getElementById('region').value
+                };
+                
+                // Send POST request to API
+                fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(response => response.json())
+                .then(result => {
+                    // Hide loading state
+                    hideLoading();
+                    
+                    if (result.status === 'success') {
+                        // Update metrics first to determine if there's remaining capacity
+                        const metrics = result.metrics;
+                        
+                        // Fix overload status based on remaining capacity
+                        // If remaining capacity > 0, then it's not overloaded regardless of model prediction
+                        const remainingCapacityValue = parseFloat(metrics.remaining_capacity);
+                        const isOverloaded = (remainingCapacityValue <= 0);
+                        
+                        // Update prediction result
+                        predictionResult.textContent = isOverloaded ? 'Overloaded' : 'Not Overloaded';
+                        predictionResult.className = isOverloaded ? 'mb-3 text-danger animate__animated animate__pulse' : 'mb-3 text-success animate__animated animate__pulse';
+                        
+                        // Use actual confidence from the model without artificial minimum
+                        const baseConfidenceValue = result.confidence || 0.7; // Use 70% as fallback only if no confidence provided
+                        
+                        // Apply more dynamic styling to confidence value
+                        confidenceValue.textContent = (baseConfidenceValue * 100).toFixed(1) + '%';
+                        
+                        // Style the confidence with appropriate color based on value
+                        if (baseConfidenceValue > 0.9) {
+                            confidenceValue.style.color = 'var(--success-color)';
+                            confidenceValue.style.fontWeight = 'bold';
+                        } else if (baseConfidenceValue > 0.8) {
+                            confidenceValue.style.color = 'var(--success-color)';
+                        } else if (baseConfidenceValue > 0.7) {
+                            confidenceValue.style.color = 'var(--warning-color)';
+                        } else {
+                            confidenceValue.style.color = 'var(--danger-color)';
+                        }
+                        
+                        // Calculate adjusted confidence based on environmental factors
+                        const adjustedConfidenceValue = calculateAdjustedConfidence(
+                            baseConfidenceValue,
+                            data.road_condition,
+                            data.weather,
+                            data.region
+                        );
+                        
+                        // Update adjusted confidence display with animation
+                        adjustedConfidence.textContent = (adjustedConfidenceValue * 100).toFixed(1) + '%';
+                        adjustedConfidence.classList.add('animate__animated', 'animate__fadeIn');
+                        
+                        // Update metrics
+                        loadPercentage.textContent = `Load: ${metrics.load_percentage}%`;
+                        
+                        // Set progress bar percentage without animation initially
+                        loadPercentageBar.setAttribute('aria-valuenow', metrics.load_percentage);
+                        if (metrics.load_percentage < 70) {
+                            loadPercentageBar.className = 'progress-bar bg-success';
+                        } else if (metrics.load_percentage < 90) {
+                            loadPercentageBar.className = 'progress-bar bg-warning';
+                        } else {
+                            loadPercentageBar.className = 'progress-bar bg-danger';
+                        }
+                        
+                        // Update other metrics with animations
+                        totalWeight.textContent = `${metrics.total_weight} kg`;
+                        totalWeight.parentElement.classList.add('animate__animated', 'animate__fadeIn');
+                        
+                        remainingCapacity.textContent = `${metrics.remaining_capacity} kg`;
+                        remainingCapacity.parentElement.classList.add('animate__animated', 'animate__fadeIn');
+                        
+                        // Apply pulsing animation to critical values
+                        if (remainingCapacityValue <= 100) {
+                            remainingCapacity.parentElement.parentElement.classList.add('pulse-border');
+                        } else {
+                            remainingCapacity.parentElement.parentElement.classList.remove('pulse-border');
+                        }
+                        
+                        // Risk assessment with color coding and animations
+                        riskAssessment.textContent = metrics.risk_assessment;
+                        riskAssessment.parentElement.classList.add('animate__animated', 'animate__fadeIn');
+                        
+                        if (metrics.risk_assessment === 'Low') {
+                            riskAssessment.className = 'card-text display-5 text-success animate__animated animate__fadeIn';
+                        } else if (metrics.risk_assessment === 'Medium') {
+                            riskAssessment.className = 'card-text display-5 text-warning animate__animated animate__fadeIn';
+                        } else {
+                            riskAssessment.className = 'card-text display-5 text-danger animate__animated animate__fadeIn';
+                            riskAssessment.parentElement.parentElement.classList.add('pulse-border');
+                        }
+                        
+                        // Add floating animation to cards
+                        document.querySelectorAll('.metric-card').forEach(card => {
+                            card.classList.add('float-animation');
+                        });
+                        
+                        fuelEfficiency.textContent = `${metrics.fuel_efficiency_impact}%`;
+                        fuelEfficiency.parentElement.classList.add('animate__animated', 'animate__fadeIn');
+                        
+                        // Update weight distribution graph
+                        if (result.graph_url) {
+                            // Add timestamp to prevent caching
+                            weightDistributionGraph.src = result.graph_url + '?t=' + new Date().getTime();
+                            graphContainer.style.display = 'block';
+                            
+                            // Add animation
+                            weightDistributionGraph.classList.add('animate__animated', 'animate__fadeIn');
+                        } else {
+                            graphContainer.style.display = 'none';
+                        }
+                        
+                        // Generate hidden analytics in the background
+                        generateHiddenAnalytics(data);
+                        
+                        // Show result with animation
+                        showResultWithAnimation();
+                        
+                        // Update metric overlays with new data
+                        updateMetricOverlays();
+                    } else {
+                        // Show error
+                        alert('Error: ' + result.message);
+                    }
+                })
+                .catch(error => {
+                    hideLoading();
+                    alert('Error: ' + error.message);
+                });
+            });
+            
+            // Function to update metric overlays with current data
+            function updateMetricOverlays() {
+                const metricCards = document.querySelectorAll('.metric-card');
+                metricCards.forEach(card => {
+                    const cardTitle = card.querySelector('.card-title').textContent;
+                    const cardValue = card.querySelector('.card-text').textContent;
+                    const detailOverlay = card.querySelector('.metric-detail');
+                    
+                    if (!detailOverlay) return;
+                    
+                    let detailContent = '';
+                    
+                    switch(cardTitle) {
+                        case 'Total Weight':
+                            detailContent = `<h4>${cardTitle}</h4>
+                                <p>The combined weight of the vehicle, passengers, and cargo.</p>
+                                <p>Current value: <strong>${cardValue}</strong></p>
+                                <p>This affects fuel efficiency and vehicle handling.</p>`;
+                            break;
+                        case 'Remaining Capacity':
+                            detailContent = `<h4>${cardTitle}</h4>
+                                <p>The weight capacity still available for additional cargo.</p>
+                                <p>Current value: <strong>${cardValue}</strong></p>
+                                <p>Exceeding capacity can lead to safety issues and vehicle damage.</p>`;
+                            break;
+                        case 'Risk Assessment':
+                            detailContent = `<h4>${cardTitle}</h4>
+                                <p>The evaluated risk level of the current load configuration.</p>
+                                <p>Current assessment: <strong>${cardValue}</strong></p>
+                                <p>Based on load percentage and environmental factors.</p>`;
+                            break;
+                        case 'Fuel Efficiency Impact':
+                            detailContent = `<h4>${cardTitle}</h4>
+                                <p>The estimated impact on fuel consumption.</p>
+                                <p>Current impact: <strong>${cardValue}</strong></p>
+                                <p>Heavier loads require more fuel and increase emissions.</p>`;
+                            break;
+                        default:
+                            detailContent = `<h4>${cardTitle}</h4>
+                                <p>Current value: <strong>${cardValue}</strong></p>`;
+                    }
+                    
+                    detailOverlay.innerHTML = detailContent;
+                });
+            }
+            
+            // Pre-fill with sample data based on vehicle type selection
+            document.getElementById('vehicleType').addEventListener('change', function() {
+                const vehicleType = this.value;
+                let weight = 0;
+                let maxLoad = 0;
+                let passengers = 0;
+                
+                switch (vehicleType) {
+                    case '2-wheeler':
+                        weight = 150;
+                        maxLoad = 250;
+                        passengers = 2;
+                        break;
+                    case '4-wheeler 5-seater':
+                        weight = 1200;
+                        maxLoad = 1800;
+                        passengers = 5;
+                        break;
+                    case '4-wheeler 7-seater':
+                        weight = 1800;
+                        maxLoad = 2500;
+                        passengers = 7;
+                        break;
+                    case 'delivery vehicle':
+                        weight = 3000;
+                        maxLoad = 5000;
+                        passengers = 2;
+                        break;
+                    case 'heavy vehicle':
+                        weight = 8000;
+                        maxLoad = 15000;
+                        passengers = 2;
+                        break;
+                }
+                
+                const weightInput = document.getElementById('weight');
+                const maxLoadInput = document.getElementById('maxLoadCapacity');
+                const passengerInput = document.getElementById('passengerCount');
+                
+                // Animate the input changes
+                weightInput.classList.add('animate__animated', 'animate__fadeIn');
+                maxLoadInput.classList.add('animate__animated', 'animate__fadeIn');
+                passengerInput.classList.add('animate__animated', 'animate__fadeIn');
+                
+                weightInput.value = weight;
+                maxLoadInput.value = maxLoad;
+                passengerInput.value = passengers;
+                
+                // Remove animation classes after animation completes
+                setTimeout(() => {
+                    weightInput.classList.remove('animate__animated', 'animate__fadeIn');
+                    maxLoadInput.classList.remove('animate__animated', 'animate__fadeIn');
+                    passengerInput.classList.remove('animate__animated', 'animate__fadeIn');
+                }, 1000);
+            });
+            
+            // Add floating labels effect to the form inputs
+            const formInputs = document.querySelectorAll('.form-control, .form-select');
+            formInputs.forEach(input => {
+                input.addEventListener('focus', function() {
+                    this.parentElement.classList.add('focused');
+                });
+                
+                input.addEventListener('blur', function() {
+                    this.parentElement.classList.remove('focused');
+                });
+            });
+            
+            // Add number input animations
+            const numberInputs = document.querySelectorAll('input[type="number"]');
+            numberInputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    this.classList.add('animate__animated', 'animate__pulse');
+                    setTimeout(() => {
+                        this.classList.remove('animate__animated', 'animate__pulse');
+                    }, 500);
+                });
+            });
+            
+            // Add section title animations
+            const sectionHeadings = document.querySelectorAll('h4, h5');
+            sectionHeadings.forEach(heading => {
+                if (!heading.classList.contains('card-title') && 
+                    !heading.id.includes('prediction') && 
+                    !heading.id.includes('load')) {
+                    heading.classList.add('section-title');
+                }
+            });
+            
+            // Add animated background to environment impact section
+            const envImpactSection = document.querySelector('.mt-4 h5');
+            if (envImpactSection) {
+                envImpactSection.classList.add('animate__animated', 'animate__fadeIn');
+                const envFactorsRow = document.querySelector('.mt-4 .row');
+                if (envFactorsRow) {
+                    envFactorsRow.classList.add('animate__animated', 'animate__fadeIn');
+                    envFactorsRow.style.animationDelay = '0.3s';
+                }
+            }
+            
+            // Make alert more visually distinct
+            const alertInfo = document.querySelector('.alert-info');
+            if (alertInfo) {
+                alertInfo.classList.add('animate__animated', 'animate__fadeIn');
+                alertInfo.style.borderRadius = '12px';
+                alertInfo.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.1)';
+                
+                // Dark mode support
+                if (document.body.classList.contains('dark-mode')) {
+                    alertInfo.style.boxShadow = '0 5px 15px rgba(255, 255, 255, 0.05)';
+                }
+            }
+        });
+    </script>
+</body>
+</html> 
