@@ -1,0 +1,216 @@
+/* Main styles for Vehicle Load Management App */
+
+/* Custom accent colors */
+:root {
+    --primary-color: #3A6EA5;
+    --primary-dark: #2d5986;
+    --success-color: #28a745;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --light-bg: #f8f9fa;
+    --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Body and basic elements */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--light-bg);
+    color: #333;
+    line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+}
+
+/* Navbar customization */
+.navbar {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand {
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+/* Card enhancements */
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    overflow: hidden;
+    margin-bottom: 25px;
+}
+
+.card:hover {
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+    background-color: var(--primary-color);
+    color: white;
+    font-weight: 600;
+    padding: 15px 20px;
+    border-bottom: none;
+}
+
+.card-body {
+    padding: 25px;
+}
+
+/* Form elements */
+.form-label {
+    font-weight: 500;
+    margin-bottom: 8px;
+    color: #495057;
+}
+
+.form-control, .form-select {
+    border-radius: 8px;
+    padding: 10px 15px;
+    border: 1px solid #ced4da;
+    transition: all 0.3s;
+}
+
+.form-control:focus, .form-select:focus {
+    box-shadow: 0 0 0 0.25rem rgba(58, 110, 165, 0.25);
+    border-color: var(--primary-color);
+}
+
+/* Button customization */
+.btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+/* Results display */
+.result-card {
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+}
+
+.result-card.visible {
+    opacity: 1;
+}
+
+.metric-card {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s ease;
+}
+
+.metric-card:hover {
+    transform: translateY(-5px);
+}
+
+.result-safe {
+    color: var(--success-color);
+    font-weight: 700;
+}
+
+.result-danger {
+    color: var(--danger-color);
+    font-weight: 700;
+}
+
+/* Progress bar */
+.progress {
+    height: 15px;
+    border-radius: 7px;
+    margin: 15px 0;
+    background-color: #e9ecef;
+}
+
+.progress-bar {
+    transition: width 1s ease-in-out;
+}
+
+/* Risk assessment colors */
+.risk-low {
+    color: var(--success-color);
+}
+
+.risk-medium {
+    color: var(--warning-color);
+}
+
+.risk-high {
+    color: var(--danger-color);
+}
+
+/* Loading indicator */
+#loading {
+    display: none;
+    text-align: center;
+    margin: 60px 0;
+}
+
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+
+/* Graph container */
+#graphContainer {
+    padding: 15px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: var(--card-shadow);
+    margin-top: 25px;
+}
+
+#weightDistributionGraph {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin-top: 10px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+    .container {
+        padding: 15px;
+    }
+    
+    .card {
+        margin-bottom: 20px;
+    }
+    
+    .card-body {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 576px) {
+    .card-body {
+        padding: 15px;
+    }
+    
+    .btn {
+        width: 100%;
+    }
+    
+    .display-6 {
+        font-size: 1.5rem;
+    }
+} 
